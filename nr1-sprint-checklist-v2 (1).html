@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NR1 · Sprint Tracker — Virada no Café</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --yellow: #F5C400;
+    --yellow-dim: #c49a00;
+    --yellow-bg: rgba(245,196,0,0.07);
+    --bg: #0f0f0f;
+    --surface: #191919;
+    --surface2: #222222;
+    --surface3: #1c1c1c;
+    --border: #2a2a2a;
+    --border2: #333;
+    --text: #e8e8e8;
+    --muted: #5a5a5a;
+    --muted2: #888;
+    --done: #2a9d3a;
+    --done-bg: rgba(42,157,58,0.08);
+    --blue: #6ab9f5;
+    --blue-bg: rgba(106,185,245,0.08);
+    --purple: #c09aff;
+    --purple-bg: rgba(192,154,255,0.08);
+    --orange: #ffab6e;
+    --orange-bg: rgba(255,171,110,0.08);
+    --note-bg: rgba(245,196,0,0.04);
+    --note-border: rgba(245,196,0,0.18);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    min-height: 100vh;
+    padding: 48px 24px 100px;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    max-width: 860px;
+    margin: 0 auto 12px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .logo-area { display: flex; align-items: center; gap: 16px; }
+
+  .diamond {
+    width: 44px; height: 44px;
+    background: var(--yellow);
+    transform: rotate(45deg);
+    border-radius: 5px;
+    flex-shrink: 0;
+    position: relative;
+  }
+
+  .brand h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--yellow);
+    letter-spacing: -0.5px;
+    line-height: 1.1;
+  }
+
+  .brand .subtitle {
+    font-size: 11px;
+    color: var(--muted2);
+    margin-top: 4px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .brand .subtitle span {
+    color: var(--yellow);
+    opacity: 0.7;
+  }
+
+  .progress-global { text-align: right; }
+
+  .progress-global .pct {
+    font-family: 'Syne', sans-serif;
+    font-size: 40px;
+    font-weight: 800;
+    color: var(--yellow);
+    line-height: 1;
+  }
+
+  .progress-global .label {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 2px;
+  }
+
+  .progress-bar-wrap {
+    width: 200px;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    margin: 10px 0 0 auto;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--yellow-dim), var(--yellow));
+    border-radius: 2px;
+    transition: width 0.5s ease;
+  }
+
+  /* ── TEAM BADGE ── */
+  .team-badge {
+    max-width: 860px;
+    margin: 0 auto 40px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    width: fit-content;
+  }
+
+  .team-badge .coffee {
+    font-size: 16px;
+  }
+
+  .team-badge .text {
+    font-size: 11px;
+    color: var(--muted2);
+    letter-spacing: 0.5px;
+  }
+
+  .team-badge .text strong {
+    color: var(--yellow);
+    font-weight: 500;
+  }
+
+  .team-dots {
+    display: flex;
+    gap: 6px;
+    margin-left: 4px;
+  }
+
+  .team-dot {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--surface2);
+    border: 1.5px solid var(--border2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    color: var(--yellow);
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, transform 0.15s;
+  }
+
+  .team-dot:hover {
+    background: var(--yellow);
+    border-color: var(--yellow);
+    color: var(--bg);
+    transform: translateY(-2px);
+  }
+
+  /* ── SPRINTS ── */
+  .sprints {
+    max-width: 860px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .sprint {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .sprint.active {
+    border-color: rgba(245,196,0,0.4);
+    box-shadow: 0 0 0 1px rgba(245,196,0,0.08), 0 6px 32px rgba(245,196,0,0.05);
+  }
+
+  .sprint-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 20px;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s;
+  }
+
+  .sprint-header:hover { background: var(--surface2); }
+
+  .sprint-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    color: #0f0f0f;
+    background: var(--yellow);
+    padding: 3px 9px;
+    border-radius: 5px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    flex-shrink: 0;
+    transition: background 0.2s;
+  }
+
+  .sprint-num.completed { background: var(--done); color: white; }
+
+  .sprint-title {
+    flex: 1;
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+  }
+
+  .sprint-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .sprint-count { font-size: 12px; color: var(--muted); }
+  .sprint-count span { color: var(--yellow); }
+
+  .mini-bar {
+    width: 56px; height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .mini-bar-fill {
+    height: 100%;
+    background: var(--yellow);
+    border-radius: 2px;
+    transition: width 0.4s ease;
+  }
+
+  .mini-bar-fill.full { background: var(--done); }
+
+  .chevron {
+    color: var(--muted);
+    font-size: 14px;
+    transition: transform 0.25s;
+    margin-left: 4px;
+  }
+
+  .sprint.open .chevron { transform: rotate(180deg); }
+
+  /* ── SPRINT BODY ── */
+  .sprint-body {
+    display: none;
+    padding: 0 20px 20px;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .sprint.open .sprint-body { display: flex; }
+
+  .body-divider {
+    height: 1px;
+    background: var(--border);
+    margin-bottom: 14px;
+  }
+
+  /* ── TASKS ── */
+  .tasks-section { display: flex; flex-direction: column; gap: 6px; margin-bottom: 20px; }
+
+  .task {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: var(--bg);
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s, opacity 0.2s;
+  }
+
+  .task:hover { border-color: var(--border); background: var(--surface3); }
+  .task.checked { opacity: 0.5; }
+
+  .task-checkbox {
+    width: 17px; height: 17px;
+    border: 1.5px solid var(--border2);
+    border-radius: 4px;
+    flex-shrink: 0;
+    margin-top: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+    background: var(--surface);
+  }
+
+  .task.checked .task-checkbox {
+    background: var(--done);
+    border-color: var(--done);
+  }
+
+  .task-checkbox::after {
+    content: '';
+    display: none;
+    width: 4px; height: 8px;
+    border: 2px solid white;
+    border-top: none; border-left: none;
+    transform: rotate(45deg) translate(-1px, -1px);
+  }
+
+  .task.checked .task-checkbox::after { display: block; }
+
+  .task-content { flex: 1; }
+
+  .task-label {
+    font-size: 12.5px;
+    color: var(--text);
+    line-height: 1.5;
+    transition: color 0.15s;
+  }
+
+  .task.checked .task-label { text-decoration: line-through; color: var(--muted); }
+
+  .task-tag {
+    display: inline-block;
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 3px;
+    margin-top: 5px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+
+  .tag-dev     { background: var(--yellow-bg);  color: var(--yellow-dim); }
+  .tag-client  { background: var(--blue-bg);    color: var(--blue); }
+  .tag-qa      { background: var(--purple-bg);  color: var(--purple); }
+  .tag-infra   { background: var(--orange-bg);  color: var(--orange); }
+  .tag-design  { background: rgba(255,120,170,0.10); color: #ff82b0; }
+
+  /* ── NOTES AREA ── */
+  .notes-section {
+    border-top: 1px dashed var(--border2);
+    padding-top: 16px;
+    margin-top: 4px;
+  }
+
+  .notes-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+
+  .notes-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--yellow);
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+
+  .notes-title::before {
+    content: '';
+    display: inline-block;
+    width: 8px; height: 8px;
+    background: var(--yellow);
+    border-radius: 2px;
+    transform: rotate(45deg);
+  }
+
+  .notes-count {
+    font-size: 10px;
+    color: var(--muted);
+    background: var(--surface2);
+    padding: 2px 8px;
+    border-radius: 10px;
+  }
+
+  .notes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .note-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 12px;
+    background: var(--note-bg);
+    border: 1px solid var(--note-border);
+    border-radius: 8px;
+    animation: fadeIn 0.2s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .note-text {
+    flex: 1;
+    font-size: 12px;
+    color: var(--text);
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .note-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  .note-date {
+    font-size: 10px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .note-delete {
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 14px;
+    padding: 0;
+    line-height: 1;
+    transition: color 0.15s;
+  }
+
+  .note-delete:hover { color: #ff6b6b; }
+
+  .note-input-row {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+  }
+
+  .note-textarea {
+    flex: 1;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    padding: 10px 12px;
+    resize: none;
+    min-height: 40px;
+    max-height: 120px;
+    line-height: 1.5;
+    transition: border-color 0.15s, min-height 0.2s;
+    overflow-y: auto;
+  }
+
+  .note-textarea:focus {
+    outline: none;
+    border-color: rgba(245,196,0,0.4);
+    background: var(--surface3);
+    min-height: 72px;
+  }
+
+  .note-textarea::placeholder { color: var(--muted); }
+
+  .note-add-btn {
+    background: var(--yellow);
+    border: none;
+    border-radius: 8px;
+    color: var(--bg);
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 10px 14px;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    transition: background 0.15s, transform 0.1s;
+    white-space: nowrap;
+    align-self: flex-end;
+    height: 40px;
+  }
+
+  .note-add-btn:hover { background: #ffd52b; transform: translateY(-1px); }
+  .note-add-btn:active { transform: translateY(0); }
+
+  /* ── LEGEND ── */
+  .footer {
+    max-width: 860px;
+    margin: 32px auto 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    padding: 14px 18px;
+    background: var(--surface);
+    border-radius: 10px;
+    border: 1px solid var(--border);
+  }
+
+  .legend { display: flex; gap: 16px; flex-wrap: wrap; }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--muted2);
+  }
+
+  .legend-dot { width: 8px; height: 8px; border-radius: 2px; }
+
+  .vnc-tag {
+    font-size: 11px;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .vnc-tag strong { color: var(--yellow); font-weight: 500; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="logo-area">
+    <div class="diamond"></div>
+    <div class="brand">
+      <h1>Plataforma NR1</h1>
+      <div class="subtitle">Solução &amp; Gestão · <span>Sprint Tracker</span></div>
+    </div>
+  </div>
+  <div class="progress-global">
+    <div class="pct" id="globalPct">0%</div>
+    <div class="label">Progresso Geral</div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="globalBar" style="width:0%"></div>
+    </div>
+  </div>
+</div>
+
+<!-- TEAM BADGE -->
+<div style="max-width:860px;margin:0 auto 36px;">
+  <div class="team-badge">
+    <span class="coffee">☕</span>
+    <div class="text">Desenvolvido por <strong>Virada no Café</strong></div>
+    <div class="team-dots">
+      <a href="https://www.linkedin.com/in/" target="_blank" rel="noopener" class="team-dot" title="Jonas Marques — Dev Full-Stack · Ver LinkedIn">J</a>
+      <a href="https://www.linkedin.com/in/" target="_blank" rel="noopener" class="team-dot" title="Kauan Victor — Analista de Requisitos · Ver LinkedIn">K</a>
+      <a href="https://www.linkedin.com/in/" target="_blank" rel="noopener" class="team-dot" title="Tereza Oliveira — Gerente de Projetos · Ver LinkedIn">T</a>
+    </div>
+  </div>
+</div>
+
+<!-- SPRINTS -->
+<div class="sprints" id="sprints"></div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#F5C400"></div> Dev</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#6ab9f5"></div> Cliente</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#c09aff"></div> QA / Testes</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#ffab6e"></div> Infra</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#ff82b0"></div> Design / UX</div>
+  </div>
+  <div class="vnc-tag">☕ <strong>Virada no Café</strong> &nbsp;·&nbsp; NR1 v1.0</div>
+</div>
+
+<script>
+const SPRINTS = [
+  {
+    id: 1, title: "Fundamentos",
+    tasks: [
+      { id: "1-1", label: "Definir arquitetura geral da aplicação (front, back, banco)", tag: "dev" },
+      { id: "1-2", label: "Modelagem do banco de dados (empresa, pesquisa, respondente, resposta, resultado)", tag: "dev" },
+      { id: "1-3", label: "Mapeamento da lógica de cálculo de risco por dimensão", tag: "dev" },
+      { id: "1-4", label: "⚠️ Cliente entrega: documento da fórmula de cálculo definitiva", tag: "client" },
+      { id: "1-5", label: "⚠️ Cliente entrega: questionário definitivo com perguntas e escala", tag: "client" },
+      { id: "1-6", label: "Setup do repositório e ambiente de desenvolvimento", tag: "infra" },
+      { id: "1-7", label: "Revisão e validação da arquitetura com o cliente", tag: "client" },
+      { id: "1-8", label: "Definir identidade visual da plataforma (cores, tipografia, tom)", tag: "design" },
+      { id: "1-9", label: "Criar mapa de telas: listar todas as páginas do MVP", tag: "design" },
+      { id: "1-10", label: "Wireframes de baixa fidelidade: página inicial e fluxo principal", tag: "design" },
+      { id: "1-11", label: "⚠️ Cliente valida: direção visual e mapa de telas", tag: "client" },
+    ]
+  },
+  {
+    id: 2, title: "Formulário",
+    tasks: [
+      { id: "2-1", label: "Desenvolvimento da primeira versão navegável do formulário", tag: "dev" },
+      { id: "2-2", label: "Implementar acesso via link individual (sem login obrigatório)", tag: "dev" },
+      { id: "2-3", label: "Lógica de interrupção e retomada da resposta", tag: "dev" },
+      { id: "2-4", label: "Interface limpa, sem parecer avaliação clínica", tag: "dev" },
+      { id: "2-5", label: "⚠️ Cliente valida: linguagem das perguntas está adequada?", tag: "client" },
+      { id: "2-6", label: "⚠️ Cliente valida: ordem dos blocos do questionário", tag: "client" },
+      { id: "2-7", label: "Testes de usabilidade básicos do formulário", tag: "qa" },
+      { id: "2-8", label: "Protótipo de alta fidelidade da tela do formulário (Figma ou similar)", tag: "design" },
+      { id: "2-9", label: "Design da tela de boas-vindas / instrução antes do questionário", tag: "design" },
+      { id: "2-10", label: "Design da tela de confirmação de envio (feedback ao respondente)", tag: "design" },
+      { id: "2-11", label: "⚠️ Cliente aprova: protótipo visual do formulário", tag: "client" },
+    ]
+  },
+  {
+    id: 3, title: "Cálculo de Risco",
+    tasks: [
+      { id: "3-1", label: "Cálculo automático de risco individual (baixo/médio/alto)", tag: "dev" },
+      { id: "3-2", label: "Cálculo de risco por dimensão", tag: "dev" },
+      { id: "3-3", label: "Cálculo de risco organizacional agregado", tag: "dev" },
+      { id: "3-4", label: "Garantir que o cálculo seja determinístico (não varia por interpretação)", tag: "dev" },
+      { id: "3-5", label: "⚠️ Cliente valida: os resultados calculados fazem sentido técnico?", tag: "client" },
+      { id: "3-6", label: "Testes com dados simulados (mínimo 5 respondentes)", tag: "qa" },
+      { id: "3-7", label: "Design da tela de resultado individual (cartão de risco baixo/médio/alto)", tag: "design" },
+      { id: "3-8", label: "Design da exibição de risco por dimensão (visual interpretável)", tag: "design" },
+      { id: "3-9", label: "⚠️ Cliente valida: telas de resultado fazem sentido para o usuário final?", tag: "client" },
+    ]
+  },
+  {
+    id: 4, title: "Área da Empresa",
+    tasks: [
+      { id: "4-1", label: "Implementar autenticação/login para empresa cliente", tag: "dev" },
+      { id: "4-2", label: "Tela de resultados consolidados por pesquisa", tag: "dev" },
+      { id: "4-3", label: "Regra: nunca exibir dados individuais identificáveis", tag: "dev" },
+      { id: "4-4", label: "Regra de bloqueio: mínimo de 5 respondentes para exibir resultados", tag: "dev" },
+      { id: "4-5", label: "⚠️ Cliente valida: acesso e visualização dos resultados", tag: "client" },
+      { id: "4-6", label: "Testes de segurança básicos no painel da empresa", tag: "qa" },
+      { id: "4-7", label: "Design da tela de login (empresa cliente)", tag: "design" },
+      { id: "4-8", label: "Design do painel principal da empresa (visão geral da pesquisa)", tag: "design" },
+      { id: "4-9", label: "Design da tela de resultados consolidados (tabela + indicadores)", tag: "design" },
+      { id: "4-10", label: "⚠️ Cliente aprova: protótipos das telas da área da empresa", tag: "client" },
+    ]
+  },
+  {
+    id: 5, title: "Relatórios PDF",
+    tasks: [
+      { id: "5-1", label: "Geração de relatório individual em PDF", tag: "dev" },
+      { id: "5-2", label: "Geração de relatório empresarial/consolidado em PDF", tag: "dev" },
+      { id: "5-3", label: "Layout PDF com identidade visual da consultoria", tag: "dev" },
+      { id: "5-4", label: "⚠️ Cliente aprova: layout e conteúdo do relatório PDF", tag: "client" },
+      { id: "5-5", label: "Testes de geração com diferentes volumes de dados", tag: "qa" },
+      { id: "5-6", label: "Design do template do relatório individual em PDF", tag: "design" },
+      { id: "5-7", label: "Design do template do relatório empresarial em PDF", tag: "design" },
+      { id: "5-8", label: "Revisão de consistência visual: fontes, cores e logo nos PDFs", tag: "design" },
+    ]
+  },
+  {
+    id: 6, title: "Dashboard",
+    tasks: [
+      { id: "6-1", label: "Gráficos de resultado por dimensão", tag: "dev" },
+      { id: "6-2", label: "Médias e indicadores consolidados", tag: "dev" },
+      { id: "6-3", label: "Filtros de controle (departamento, cargo, período)", tag: "dev" },
+      { id: "6-4", label: "⚠️ Cliente valida: filtros e gráficos atendem à tomada de decisão?", tag: "client" },
+      { id: "6-5", label: "Testes de performance com múltiplos respondentes", tag: "qa" },
+      { id: "6-6", label: "Design da tela de dashboard (layout de gráficos e métricas)", tag: "design" },
+      { id: "6-7", label: "Design dos componentes de gráfico (barras, pizza, indicadores)", tag: "design" },
+      { id: "6-8", label: "Design dos filtros e controles de análise (dropdowns, datas)", tag: "design" },
+      { id: "6-9", label: "⚠️ Cliente valida: protótipo visual do dashboard", tag: "client" },
+    ]
+  },
+  {
+    id: 7, title: "LGPD + Segurança",
+    tasks: [
+      { id: "7-1", label: "Tela de termo de consentimento antes do formulário", tag: "dev" },
+      { id: "7-2", label: "Controle de anonimização dos dados armazenados", tag: "dev" },
+      { id: "7-3", label: "Revisão de todos os pontos de exposição de dados pessoais", tag: "dev" },
+      { id: "7-4", label: "⚠️ Cliente aprova: texto do termo de consentimento (legal)", tag: "client" },
+      { id: "7-5", label: "Auditoria de segurança: acesso, autenticação e dados sensíveis", tag: "qa" },
+      { id: "7-6", label: "Documentar política de privacidade básica da plataforma", tag: "infra" },
+      { id: "7-7", label: "Design da tela de termo de consentimento (LGPD)", tag: "design" },
+      { id: "7-8", label: "Revisão geral de consistência visual em todas as telas", tag: "design" },
+      { id: "7-9", label: "Ajustes de responsividade e acessibilidade nas telas principais", tag: "design" },
+    ]
+  },
+  {
+    id: 8, title: "Entrega Final",
+    tasks: [
+      { id: "8-1", label: "Testes end-to-end (funcionário → empresa → consultoria)", tag: "qa" },
+      { id: "8-2", label: "Correções e ajustes finais identificados nos testes", tag: "dev" },
+      { id: "8-3", label: "Deploy em ambiente de produção", tag: "infra" },
+      { id: "8-4", label: "Configuração de domínio e SSL", tag: "infra" },
+      { id: "8-5", label: "⚠️ Cliente realiza teste final de aceitação (UAT)", tag: "client" },
+      { id: "8-6", label: "Entrega de documentação básica de uso", tag: "infra" },
+      { id: "8-7", label: "Sistema aprovado e pronto para uso e venda ✅", tag: "client" },
+      { id: "8-8", label: "Revisão final de UI: polimento visual de todas as telas", tag: "design" },
+      { id: "8-9", label: "Entrega do arquivo de design final (Figma ou equivalente) ao cliente", tag: "design" },
+    ]
+  }
+];
+
+const TAG_CLASS = { dev:"tag-dev", client:"tag-client", qa:"tag-qa", infra:"tag-infra", design:"tag-design" };
+const TAG_LABEL = { dev:"Dev", client:"Cliente", qa:"QA / Testes", infra:"Infra", design:"Design / UX" };
+
+// ── STATE ──
+let state = { tasks: {}, notes: {} };
+try {
+  const saved = localStorage.getItem("nr1_v2_state");
+  if (saved) state = JSON.parse(saved);
+  if (!state.tasks) state.tasks = {};
+  if (!state.notes) state.notes = {};
+} catch(e) {}
+
+function save() {
+  try { localStorage.setItem("nr1_v2_state", JSON.stringify(state)); } catch(e) {}
+}
+
+function getSprintProgress(sprint) {
+  const done = sprint.tasks.filter(t => state.tasks[t.id]).length;
+  return { done, total: sprint.tasks.length, pct: Math.round(done / sprint.tasks.length * 100) };
+}
+
+function getTotalProgress() {
+  let done = 0, total = 0;
+  SPRINTS.forEach(s => s.tasks.forEach(t => { total++; if(state.tasks[t.id]) done++; }));
+  return { done, total, pct: Math.round(done / total * 100) };
+}
+
+function updateGlobal() {
+  const { pct } = getTotalProgress();
+  document.getElementById("globalPct").textContent = pct + "%";
+  document.getElementById("globalBar").style.width = pct + "%";
+}
+
+function formatDate(iso) {
+  const d = new Date(iso);
+  return d.toLocaleDateString("pt-BR", { day:"2-digit", month:"2-digit" }) +
+    " " + d.toLocaleTimeString("pt-BR", { hour:"2-digit", minute:"2-digit" });
+}
+
+// ── RENDER ──
+function render() {
+  const container = document.getElementById("sprints");
+  container.innerHTML = "";
+
+  SPRINTS.forEach((sprint, idx) => {
+    const { done, total, pct } = getSprintProgress(sprint);
+    const completed = done === total;
+    const notes = state.notes[sprint.id] || [];
+
+    const el = document.createElement("div");
+    el.className = "sprint" + (idx === 0 ? " open active" : "");
+    el.id = "sprint-" + sprint.id;
+
+    const tasksHTML = sprint.tasks.map(task => `
+      <div class="task ${state.tasks[task.id] ? 'checked' : ''}"
+           id="task-${task.id}"
+           onclick="toggleTask('${task.id}', ${sprint.id})">
+        <div class="task-checkbox"></div>
+        <div class="task-content">
+          <div class="task-label">${task.label}</div>
+          <span class="task-tag ${TAG_CLASS[task.tag]}">${TAG_LABEL[task.tag]}</span>
+        </div>
+      </div>
+    `).join("");
+
+    const notesHTML = notes.map((n, i) => `
+      <div class="note-item" id="note-${sprint.id}-${n.id}">
+        <div class="note-text">${escapeHtml(n.text)}</div>
+        <div class="note-meta">
+          <span class="note-date">${formatDate(n.date)}</span>
+          <button class="note-delete" onclick="deleteNote(${sprint.id}, '${n.id}')" title="Remover anotação">✕</button>
+        </div>
+      </div>
+    `).join("");
+
+    el.innerHTML = `
+      <div class="sprint-header" onclick="toggleSprint(${sprint.id})">
+        <div class="sprint-num ${completed ? 'completed' : ''}">S${sprint.id}</div>
+        <div class="sprint-title">Semana ${sprint.id}: ${sprint.title}</div>
+        <div class="sprint-meta">
+          <div class="sprint-count"><span>${done}</span>/${total}</div>
+          <div class="mini-bar">
+            <div class="mini-bar-fill ${completed ? 'full' : ''}" style="width:${pct}%"></div>
+          </div>
+        </div>
+        <div class="chevron">▾</div>
+      </div>
+
+      <div class="sprint-body">
+        <div class="body-divider"></div>
+
+        <div class="tasks-section">${tasksHTML}</div>
+
+        <div class="notes-section">
+          <div class="notes-header">
+            <div class="notes-title">Pontos de Melhoria</div>
+            <div class="notes-count" id="notes-count-${sprint.id}">${notes.length} anotação${notes.length !== 1 ? 'ões' : ''}</div>
+          </div>
+
+          <div class="notes-list" id="notes-list-${sprint.id}">${notesHTML}</div>
+
+          <div class="note-input-row">
+            <textarea
+              class="note-textarea"
+              id="note-input-${sprint.id}"
+              placeholder="Adicionar ponto de melhoria para esta sprint..."
+              rows="1"
+              onkeydown="handleNoteKey(event, ${sprint.id})"
+            ></textarea>
+            <button class="note-add-btn" onclick="addNote(${sprint.id})">+ Adicionar</button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    container.appendChild(el);
+  });
+
+  updateGlobal();
+}
+
+// ── INTERACTIONS ──
+function toggleSprint(id) {
+  document.getElementById("sprint-" + id).classList.toggle("open");
+}
+
+function toggleTask(taskId, sprintId) {
+  state.tasks[taskId] = !state.tasks[taskId];
+  save();
+
+  const taskEl = document.getElementById("task-" + taskId);
+  taskEl.classList.toggle("checked", state.tasks[taskId]);
+
+  const sprint = SPRINTS.find(s => s.id === sprintId);
+  const { done, total, pct } = getSprintProgress(sprint);
+  const completed = done === total;
+
+  const sprintEl = document.getElementById("sprint-" + sprintId);
+  sprintEl.querySelector(".sprint-num").className = "sprint-num" + (completed ? " completed" : "");
+  const mf = sprintEl.querySelector(".mini-bar-fill");
+  mf.style.width = pct + "%";
+  mf.className = "mini-bar-fill" + (completed ? " full" : "");
+  sprintEl.querySelector(".sprint-count span").textContent = done;
+
+  updateGlobal();
+}
+
+function addNote(sprintId) {
+  const input = document.getElementById("note-input-" + sprintId);
+  const text = input.value.trim();
+  if (!text) return;
+
+  if (!state.notes[sprintId]) state.notes[sprintId] = [];
+  const note = { id: Date.now().toString(), text, date: new Date().toISOString() };
+  state.notes[sprintId].push(note);
+  save();
+
+  const list = document.getElementById("notes-list-" + sprintId);
+  const div = document.createElement("div");
+  div.className = "note-item";
+  div.id = "note-" + sprintId + "-" + note.id;
+  div.innerHTML = `
+    <div class="note-text">${escapeHtml(note.text)}</div>
+    <div class="note-meta">
+      <span class="note-date">${formatDate(note.date)}</span>
+      <button class="note-delete" onclick="deleteNote(${sprintId}, '${note.id}')" title="Remover anotação">✕</button>
+    </div>
+  `;
+  list.appendChild(div);
+
+  updateNoteCount(sprintId);
+  input.value = "";
+  input.style.minHeight = "";
+}
+
+function deleteNote(sprintId, noteId) {
+  state.notes[sprintId] = (state.notes[sprintId] || []).filter(n => n.id !== noteId);
+  save();
+  const el = document.getElementById("note-" + sprintId + "-" + noteId);
+  if (el) el.remove();
+  updateNoteCount(sprintId);
+}
+
+function updateNoteCount(sprintId) {
+  const count = (state.notes[sprintId] || []).length;
+  const el = document.getElementById("notes-count-" + sprintId);
+  if (el) el.textContent = count + " anotaç" + (count !== 1 ? "ões" : "ão");
+}
+
+function handleNoteKey(e, sprintId) {
+  if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+    e.preventDefault();
+    addNote(sprintId);
+  }
+}
+
+function escapeHtml(str) {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/\n/g, "<br>");
+}
+
+render();
+</script>
+</body>
+</html>
